@@ -1,130 +1,192 @@
 <!DOCTYPE html>
 <!-- Define que este é um documento HTML5 -->
- 
+
 <html lang="pt-br">
 <!-- Elemento raiz da página. lang="pt-br" diz ao navegador que o idioma é português do Brasil -->
- 
+
 <head>
     <!-- O <head> contém configurações da página — nada aqui aparece visualmente -->
- 
+
     <meta charset="UTF-8">
     <!-- Define a codificação de caracteres — necessário para acentos e ç funcionarem -->
- 
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Faz a página se adaptar ao tamanho da tela do celular (responsividade) -->
- 
+
     <title>Gerador de Páginas IA</title>
     <!-- Texto que aparece na aba do navegador -->
- 
+
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
     <!-- Importa as fontes Syne e DM Mono do Google Fonts -->
- 
+
     <link rel="stylesheet" href="style.css">
     <!-- Conecta o arquivo style.css a este HTML — todos os estilos vêm daqui -->
- 
+
 </head>
- 
+
 <body>
     <!-- O <body> contém tudo que aparece visualmente na página -->
- 
+
     <div class="container">
         <!-- Caixa central que agrupa todo o conteúdo — estilizada no CSS como .container -->
- 
+
         <p class="etiqueta">DEV IA</p>
         <!-- Parágrafo com a classe "etiqueta" — vira o badge verde no topo -->
- 
+
         <h1>Crie sua Página
             <br>
             <!-- <br> força uma quebra de linha aqui -->
             <span>com um prompt</span>
             <!-- <span> envolve parte do texto para estilizar só essa palavra no CSS (fica em itálico verde) -->
         </h1>
- 
+
         <p class="subtitulo">Digite um prompt para criar sua página personalizada:</p>
         <!-- Texto explicativo abaixo do título, estilizado com a classe "subtitulo" -->
- 
+
         <div class="input-wrapper">
             <!-- Div que agrupa o campo de texto e o botão lado a lado (flex no CSS) -->
- 
+
             <input type="text" id="promptInput" placeholder="Descreva seu negócio. Ex: 'Restaurante, Loja de Roupas, PetShop, etc...'">
             <!-- Campo de texto onde o usuário digita o prompt -->
             <!-- type="text" → campo de texto comum -->
             <!-- id="promptInput" → identificador único usado pelo JavaScript para pegar o valor -->
             <!-- placeholder → texto de exemplo que some quando o usuário começa a digitar -->
- 
+
             <button onclick="generatePage()">Gerar</button>
             <!-- Botão que ao ser clicado chama a função generatePage() do JavaScript -->
- 
+
         </div>
- 
+
         <div id="generatedContent"></div>
-        <!-- Caixa vazia que o JavaScript vai preencher com o conteúdo gerado -->
+        <!-- Caixa vazia que o JavaScript vai preencher com o resumo da geração -->
         <!-- Começa invisível (display: none no CSS) e aparece quando o JS adiciona a classe "visible" -->
- 
-        <button id="copyBtn" onclick="copyToClipboard()">Copiar conteúdo</button>
+
+        <button id="copyBtn" onclick="copyToClipboard()">Copiar HTML</button>
         <!-- Botão de copiar — também começa invisível e aparece junto com o conteúdo gerado -->
         <!-- onclick chama a função copyToClipboard() do JavaScript -->
-        <p class="bloco-codigo">Conteúdo gerado:</p>
-        <iframe class="bloco-site"></iframe>
-        <!--site que fica dentro-->
+
+        <div class="caixa-resultado" id="resultado">
+            <!-- Caixa invisível que aparece com o resultado: bloco de código à esquerda, preview à direita -->
+            <pre class="bloco-codigo" id="blocoCodigo"></pre>
+            <iframe class="bloco-site" id="blocoSite" sandbox="allow-same-origin"></iframe>
+        </div>
     </div>
     <!-- Fim do .container -->
- 
+
     <script>
-        // Tudo dentro de <script> é JavaScript — a lógica e comportamento da página
- 
-        function generatePage() {
-            // Função chamada quando o usuário clica em "Gerar"
- 
-            const prompt = document.getElementById('promptInput').value.trim();
-            // Pega o texto digitado no input e remove espaços nas bordas
- 
-            if (!prompt) return;
-            // Se o campo estiver vazio, não faz nada e para aqui
- 
-            const generatedContent = document.getElementById('generatedContent');
-            // Pega a referência da caixa de conteúdo gerado
- 
-            const copyBtn = document.getElementById('copyBtn');
-            // Pega a referência do botão copiar
- 
-            generatedContent.innerHTML = `
-                <h2>Conteúdo gerado para: ${prompt}</h2>
-                <p>Este é um exemplo de conteúdo gerado com base no prompt fornecido.</p>
-            `;
-            // Insere HTML dentro da caixa com o prompt digitado pelo usuário
- 
-            generatedContent.classList.add('visible');
-            // Adiciona a classe "visible" na caixa — o CSS faz ela aparecer
- 
-            copyBtn.classList.add('visible');
-            // Adiciona a classe "visible" no botão copiar — ele também aparece
+        // ===================================================
+        // LÓGICA DO GERADOR DE PÁGINAS
+        // ===================================================
+        // O frontend fala com um proxy Node (server.js) rodando em localhost:3000,
+        // que por sua vez chama a OpenAI. A chave da API NUNCA fica no navegador.
+
+        const API_URL = 'http://localhost:3000/api/generate';
+
+        // Guarda o HTML cru da última geração para o botão "Copiar" funcionar direito.
+        let lastGeneratedHtml = '';
+
+        // Referências DOM cacheadas
+        const promptInput    = document.getElementById('promptInput');
+        const generatedBox   = document.getElementById('generatedContent');
+        const copyBtn        = document.getElementById('copyBtn');
+        const generateBtn    = document.querySelector('.input-wrapper button');
+        const blocoCodigo    = document.getElementById('blocoCodigo');
+        const blocoSite      = document.getElementById('blocoSite');
+        const caixaResultado = document.getElementById('resultado');
+
+        async function generatePage() {
+            // Chamada quando o usuário clica em "Gerar" ou aperta Enter
+
+            const prompt = promptInput.value.trim();
+            if (!prompt) return; // prompt vazio → não faz nada
+
+            // Estado de loading: desabilita o botão e troca o texto
+            generateBtn.disabled = true;
+            const textoOriginal = generateBtn.textContent;
+            generateBtn.textContent = 'Gerando...';
+
+            try {
+                // Chama o proxy Node
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt }),
+                });
+
+                // Tenta ler o JSON mesmo em caso de erro (o backend devolve {error: "..."})
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(data.error || `Erro HTTP ${res.status}`);
+                }
+
+                const html = (data.html || '').trim();
+                if (!html) throw new Error('A IA devolveu uma resposta vazia.');
+
+                lastGeneratedHtml = html;
+
+                // 1) Resumo na caixa de texto
+                const titulo = prompt.charAt(0).toUpperCase() + prompt.slice(1);
+                generatedBox.innerHTML = `
+                    <h2>Página gerada para: ${escapeHtml(titulo)}</h2>
+                    <p>HTML completo (${html.length.toLocaleString('pt-BR')} caracteres) carregado no preview ao lado.</p>
+                `;
+                generatedBox.classList.add('visible');
+                copyBtn.classList.add('visible');
+
+                // 2) HTML formatado no bloco de código (esquerda)
+                blocoCodigo.textContent = html;
+
+                // 3) Renderiza o HTML dentro do iframe via srcdoc (direita)
+                blocoSite.srcdoc = html;
+                blocoSite.classList.add('visible');
+                caixaResultado.classList.add('visible');
+
+            } catch (err) {
+                console.error('Falha ao gerar:', err);
+                generatedBox.innerHTML = `
+                    <h2 style="color:#ff6b6b">Erro ao gerar</h2>
+                    <p>${escapeHtml(err.message || String(err))}</p>
+                    <p style="color:var(--muted);font-size:12px;margin-top:8px">
+                        Dica: confira se o proxy está rodando (<code>npm start</code>) e se o <code>.env</code> tem a chave.
+                    </p>
+                `;
+                generatedBox.classList.add('visible');
+                copyBtn.classList.add('visible');
+            } finally {
+                // Restaura o botão independente de sucesso ou erro
+                generateBtn.disabled = false;
+                generateBtn.textContent = textoOriginal;
+            }
         }
- 
+
         function copyToClipboard() {
-            // Função chamada quando o usuário clica em "Copiar conteúdo"
- 
-            const generatedContent = document.getElementById('generatedContent');
-            // Pega o elemento com o conteúdo gerado
- 
-            navigator.clipboard.writeText(generatedContent.innerText)
-            // Copia o texto da caixa para a área de transferência do sistema
- 
-                .then(() => alert('Conteúdo copiado!'))
-                // Se deu certo, mostra um alerta de sucesso
- 
+            // Copia o HTML puro (não o innerText que perderia as tags)
+
+            if (!lastGeneratedHtml) {
+                alert('Nada para copiar ainda — gere uma página primeiro.');
+                return;
+            }
+            navigator.clipboard.writeText(lastGeneratedHtml)
+                .then(() => alert('HTML copiado!'))
                 .catch(err => alert('Erro ao copiar: ' + err));
-                // Se deu erro, mostra uma mensagem com o erro
         }
- 
-        document.getElementById('promptInput').addEventListener('keydown', function(e) {
-            // Fica "escutando" teclas pressionadas dentro do input
- 
+
+        // Helper: escapa caracteres para injetar texto com segurança no innerHTML
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Enter no input também gera
+        promptInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') generatePage();
-            // Se a tecla for Enter, chama generatePage() — igual a clicar no botão
         });
     </script>
- 
+
 </body>
 </html>
- 

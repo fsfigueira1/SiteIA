@@ -264,10 +264,15 @@ button:active {
     font-family: 'DM Mono', monospace; /* fonte monoespaçada */
     font-size: 14px; /* tamanho do texto */
     line-height: 1.6; /* espaço entre linhas para melhor leitura */
-    display: flex; /* começa invisível, o JS mostra quando necessário */
+    display: none; /* começa invisível, o JS mostra adicionando .visible */
     animation: fadeDown 0.3s ease both; /* animação ao aparecer */
     width: 1400px; /* largura fixa para acomodar o conteúdo do site */
     gap: 20px; /* espaço entre o bloco de código e o iframe do site */
+}
+
+.caixa-resultado.visible {
+    /* quando o JS adiciona .visible, vira flex (duas colunas lado a lado) */
+    display: flex;
 }
 .bloco-codigo {
     font-family: 'DM Mono', monospace; /* fonte monoespaçada para o título do bloco */
@@ -288,9 +293,13 @@ button:active {
     border: 1px solid var(--border); /* borda fina ao redor do iframe */
     border-radius: 12px; /* cantos arredondados para combinar com o estilo geral */
     margin-top: 20px; /* espaço acima do iframe */
-    display: none; /* começa invisível, o JS mostra quando necessário */
+    display: none; /* começa invisível, o JS mostra adicionando .visible */
     animation: fadeDown 0.3s 0.5s ease both; /* animação com atraso para aparecer depois do título do bloco */
     width: 70%; /* largura do iframe, pode ser ajustada conforme necessário */
+}
+
+.bloco-site.visible {
+    display: block; /* visível depois da geração */
 }
 /* ===================================================
    ANIMAÇÃO fadeDown
