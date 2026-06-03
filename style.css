@@ -1,0 +1,309 @@
+/* ===================================================
+   RESET GERAL
+   Zera margens e comportamentos padrão do navegador
+   =================================================== */
+
+*, *::before, *::after {
+    box-sizing: border-box; /* faz o padding não aumentar o tamanho do elemento */
+    margin: 0;              /* remove espaço externo padrão de todos os elementos */
+    padding: 0;             /* remove espaço interno padrão de todos os elementos */
+}
+
+
+/* ===================================================
+   VARIÁVEIS DE COR
+   Defina suas cores aqui — mude uma vez, aplica em tudo
+   =================================================== */
+
+:root {
+    --bg: #0a0a0a;        /* cor do fundo da página (preto quase total) */
+    --surface: #111111;   /* cor de fundo dos cards/caixas */
+    --border: #222222;    /* cor das bordas e linhas da grade */
+    --accent: #c8f135;    /* cor de destaque (verde-limão) */
+    --text: #f0f0f0;      /* cor principal do texto */
+    --muted: #666;        /* cor de texto apagado/secundário */
+    --input-bg: #161616;  /* cor de fundo do campo de texto */
+}
+
+
+/* ===================================================
+   BODY — configuração geral da página
+   =================================================== */
+
+body {
+    background-color: var(--bg);      /* aplica a cor de fundo definida em --bg */
+    color: var(--text);               /* cor padrão de todo o texto da página */
+    font-family: 'Syne', sans-serif;  /* fonte principal usada na página */
+    min-height: 100vh;                /* página ocupa no mínimo 100% da altura da tela */
+    display: flex;                    /* ativa o flexbox para organizar os filhos */
+    flex-direction: column;           /* empilha os elementos na vertical */
+    align-items: center;              /* centraliza horizontalmente */
+    justify-content: center;          /* centraliza verticalmente */
+    padding: 40px 20px;               /* espaço interno: 40px em cima/baixo, 20px nas laterais */
+    overflow-x: hidden;               /* esconde qualquer conteúdo que saia para o lado */
+}
+
+
+/* ===================================================
+   GRADE DE FUNDO
+   Cria o efeito de grade com linhas finas no fundo
+   =================================================== */
+
+body::before {
+    content: '';           /* obrigatório para elementos ::before e ::after aparecerem */
+    position: fixed;       /* fica fixo na tela mesmo ao rolar a página */
+    inset: 0;              /* ocupa toda a tela (equivale a top/right/bottom/left: 0) */
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),          /* linhas horizontais */
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);   /* linhas verticais */
+    background-size: 48px 48px; /* tamanho de cada quadrado da grade */
+    opacity: 0.4;               /* deixa a grade semi-transparente (40% visível) */
+    pointer-events: none;       /* cliques passam através desse elemento, não o bloqueiam */
+    z-index: 0;                 /* fica atrás de todo o conteúdo */
+}
+
+
+/* ===================================================
+   CONTAINER — caixa central que agrupa o conteúdo
+   =================================================== */
+
+.container {
+    position: relative; /* necessário para o z-index funcionar */
+    z-index: 1;         /* fica na frente da grade do fundo */
+    width: 100%;        /* ocupa toda a largura disponível */
+    max-width: 680px;   /* mas nunca passa de 680px de largura */
+    display: flex;      /* ativa o flexbox */
+    flex-direction: column; /* empilha os filhos na vertical */
+    gap: 28px;          /* espaço de 28px entre cada elemento filho */
+}
+
+
+/* ===================================================
+   ETIQUETA — o badge "Desenvolvedor IA"
+   =================================================== */
+
+.etiqueta {
+    display: inline-block;          /* ocupa só o espaço do próprio texto */
+    font-family: 'DM Mono', monospace; /* fonte monoespaçada (estilo terminal) */
+    font-size: 11px;                /* texto pequeno */
+    letter-spacing: 0.18em;        /* espaço extra entre as letras */
+    text-transform: uppercase;      /* transforma o texto em MAIÚSCULAS */
+    color: var(--accent);           /* cor verde-limão */
+    border: 1px solid var(--accent); /* borda fina na cor de destaque */
+    padding: 5px 12px;              /* espaço interno: 5px cima/baixo, 12px laterais */
+    border-radius: 2px;             /* leve arredondamento dos cantos */
+    width: fit-content;             /* largura se ajusta ao conteúdo */
+    animation: fadeDown 0.5s ease both; /* entra com animação (definida no final) */
+}
+
+
+/* ===================================================
+   TÍTULO H1
+   =================================================== */
+
+h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem); /* tamanho responsivo: mín 2.4rem, ideal 6vw, máx 4rem */
+    font-weight: 800;                     /* texto bem negrito */
+    line-height: 1.05;                    /* altura da linha bem compacta */
+    letter-spacing: -0.02em;             /* letras ligeiramente mais juntas */
+    animation: fadeDown 0.5s 0.1s ease both; /* animação com 0.1s de atraso */
+}
+
+h1 span {
+    color: var(--accent); /* a palavra dentro do span fica verde-limão */
+    font-style: italic;   /* e em itálico */
+}
+
+
+/* ===================================================
+   SUBTÍTULO
+   =================================================== */
+
+.subtitulo {
+    font-size: 15px;                    /* tamanho do texto */
+    color: var(--muted);                /* cor apagada (cinza) */
+    font-family: 'DM Mono', monospace;  /* fonte monoespaçada */
+    animation: fadeDown 0.5s 0.2s ease both; /* animação com 0.2s de atraso */
+}
+
+
+/* ===================================================
+   WRAPPER DO INPUT — envolve o campo de texto + botão
+   =================================================== */
+
+.input-wrapper {
+    display: flex;   /* coloca o input e o botão lado a lado */
+    gap: 10px;       /* espaço de 10px entre eles */
+    animation: fadeDown 0.5s 0.3s ease both; /* animação com 0.3s de atraso */
+}
+
+
+/* ===================================================
+   CAMPO DE TEXTO (INPUT)
+   =================================================== */
+
+#promptInput {
+    flex: 1;                            /* ocupa todo o espaço disponível ao lado do botão */
+    background: var(--input-bg);        /* fundo escuro do campo */
+    border: 1px solid var(--border);    /* borda fina escura */
+    border-radius: 6px;                 /* cantos arredondados */
+    padding: 14px 18px;                 /* espaço interno confortável */
+    font-size: 15px;                    /* tamanho do texto digitado */
+    font-family: 'DM Mono', monospace;  /* fonte monoespaçada no input */
+    color: var(--text);                 /* cor do texto digitado */
+    outline: none;                      /* remove o contorno padrão do navegador ao clicar */
+    transition: border-color 0.2s, box-shadow 0.2s; /* anima suavemente ao focar */
+}
+
+#promptInput::placeholder {
+    color: #3a3a3a;      /* cor do texto de exemplo (bem escuro) */
+    font-style: italic;  /* placeholder em itálico */
+}
+
+#promptInput:focus {
+    /* estilos aplicados quando o usuário clica no campo */
+    border-color: var(--accent);                      /* borda fica verde-limão */
+    box-shadow: 0 0 0 3px rgba(200, 241, 53, 0.08);  /* brilho sutil ao redor */
+}
+
+
+/* ===================================================
+   BOTÕES (todos os <button> da página)
+   =================================================== */
+
+button {
+    background: var(--accent);          /* fundo verde-limão */
+    color: #0a0a0a;                     /* texto preto */
+    border: none;                       /* sem borda */
+    border-radius: 6px;                 /* cantos arredondados */
+    padding: 14px 24px;                 /* espaço interno */
+    font-size: 14px;                    /* tamanho do texto */
+    font-family: 'Syne', sans-serif;    /* fonte do botão */
+    font-weight: 700;                   /* texto negrito */
+    letter-spacing: 0.05em;            /* letras levemente espaçadas */
+    cursor: pointer;                    /* cursor vira mãozinha ao passar em cima */
+    transition: background 0.15s, transform 0.1s; /* anima hover e clique */
+    white-space: nowrap;                /* impede o texto de quebrar linha */
+}
+
+button:hover {
+    /* quando o mouse passa por cima do botão */
+    background: #d8ff40; /* verde-limão um pouco mais claro */
+}
+
+button:active {
+    /* quando o botão é clicado */
+    transform: scale(0.97); /* encolhe levemente (sensação de "pressionar") */
+}
+
+
+/* ===================================================
+   CAIXA DE CONTEÚDO GERADO
+   =================================================== */
+
+#generatedContent {
+    background: var(--surface);          /* fundo levemente mais claro que a página */
+    border: 1px solid var(--border);     /* borda fina */
+    border-radius: 8px;                  /* cantos arredondados */
+    padding: 24px;                       /* espaço interno generoso */
+    font-family: 'DM Mono', monospace;   /* fonte monoespaçada */
+    font-size: 14px;                     /* tamanho do texto */
+    line-height: 1.7;                    /* espaço entre linhas (confortável para leitura) */
+    color: var(--text);                  /* cor do texto */
+    min-height: 80px;                    /* altura mínima mesmo quando vazio */
+    display: none;                       /* começa invisível (o JS mostra quando necessário) */
+    animation: fadeDown 0.3s ease both;  /* animação ao aparecer */
+}
+
+#generatedContent h2 {
+    font-family: 'Syne', sans-serif; /* fonte diferente para o título interno */
+    font-size: 18px;                 /* tamanho do título */
+    margin-bottom: 10px;             /* espaço abaixo do título */
+    color: var(--accent);            /* título em verde-limão */
+}
+
+#generatedContent.visible {
+    /* quando o JS adiciona a classe "visible", a caixa aparece */
+    display: block;
+}
+
+
+/* ===================================================
+   BOTÃO COPIAR
+   =================================================== */
+
+#copyBtn {
+    display: none;                       /* começa invisível */
+    background: transparent;             /* fundo transparente */
+    border: 1px solid var(--border);     /* borda discreta */
+    color: var(--muted);                 /* texto cinza apagado */
+    font-size: 12px;                     /* texto pequeno */
+    padding: 8px 16px;                   /* espaço interno menor que o botão principal */
+    width: fit-content;                  /* largura ajustada ao conteúdo */
+    transition: border-color 0.2s, color 0.2s; /* anima a mudança de cor no hover */
+}
+
+#copyBtn:hover {
+    /* quando o mouse passa por cima */
+    border-color: var(--accent); /* borda fica verde-limão */
+    color: var(--accent);        /* texto também fica verde-limão */
+    background: transparent;     /* mantém fundo transparente */
+}
+
+#copyBtn.visible {
+    /* quando o JS adiciona a classe "visible", o botão aparece */
+    display: block;
+}
+.caixa-resultado {
+    margin-top: 40px; /* espaço acima da caixa de resultado */
+    padding: 24px;     /* espaço interno da caixa */
+    background: var(--surface); /* fundo levemente mais claro que a página */
+    border: 1px solid var(--border); /* borda fina */
+    border-radius: 8px; /* cantos arredondados */
+    color: var(--text); /* cor do texto */
+    font-family: 'DM Mono', monospace; /* fonte monoespaçada */
+    font-size: 14px; /* tamanho do texto */
+    line-height: 1.6; /* espaço entre linhas para melhor leitura */
+    display: flex; /* começa invisível, o JS mostra quando necessário */
+    animation: fadeDown 0.3s ease both; /* animação ao aparecer */
+    width: 1400px; /* largura fixa para acomodar o conteúdo do site */
+    gap: 20px; /* espaço entre o bloco de código e o iframe do site */
+}
+.bloco-codigo {
+    font-family: 'DM Mono', monospace; /* fonte monoespaçada para o título do bloco */
+    font-size: 16px; /* tamanho do texto do título do bloco */
+    color: var(--accent); /* cor verde-limão para o título do bloco */
+    margin-bottom: 12px; /* espaço abaixo do título do bloco */
+    animation: fadeDown 0.3s 0.4s ease both; /* animação com atraso para aparecer depois do conteúdo */
+    width: 30%; /* largura do título do bloco, pode ser ajustada conforme necessário */
+    white-space: pre-wrap; /* permite que o texto quebre em várias linhas se necessário */
+    overflow: auto; /* adiciona barra de rolagem se o texto for muito longo */
+    height: 600px; /* altura fixa para o título do bloco, pode ser ajustada conforme necessário */
+    border-radius: 16px; /* cantos arredondados para combinar com o estilo geral */
+    border: 1px solid var(--border); /* borda fina ao redor do título do bloco */
+}
+.bloco-site {
+    width: 100%; /* ocupa toda a largura disponível */
+    height: 400px; /* altura fixa para o iframe do site */
+    border: 1px solid var(--border); /* borda fina ao redor do iframe */
+    border-radius: 12px; /* cantos arredondados para combinar com o estilo geral */
+    margin-top: 20px; /* espaço acima do iframe */
+    display: none; /* começa invisível, o JS mostra quando necessário */
+    animation: fadeDown 0.3s 0.5s ease both; /* animação com atraso para aparecer depois do título do bloco */
+    width: 70%; /* largura do iframe, pode ser ajustada conforme necessário */
+}
+/* ===================================================
+   ANIMAÇÃO fadeDown
+   Os elementos entram caindo de cima para baixo
+   =================================================== */
+
+@keyframes fadeDown {
+    from {
+        opacity: 0;                   /* começa invisível */
+        transform: translateY(-12px); /* começa 12px acima da posição final */
+    }
+    to {
+        opacity: 1;           /* termina totalmente visível */
+        transform: translateY(0); /* termina na posição normal */
+    }
+}

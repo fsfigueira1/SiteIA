@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!-- Define que este é um documento HTML5 -->
+ 
+<html lang="pt-br">
+<!-- Elemento raiz da página. lang="pt-br" diz ao navegador que o idioma é português do Brasil -->
+ 
+<head>
+    <!-- O <head> contém configurações da página — nada aqui aparece visualmente -->
+ 
+    <meta charset="UTF-8">
+    <!-- Define a codificação de caracteres — necessário para acentos e ç funcionarem -->
+ 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Faz a página se adaptar ao tamanho da tela do celular (responsividade) -->
+ 
+    <title>Gerador de Páginas IA</title>
+    <!-- Texto que aparece na aba do navegador -->
+ 
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
+    <!-- Importa as fontes Syne e DM Mono do Google Fonts -->
+ 
+    <link rel="stylesheet" href="style.css">
+    <!-- Conecta o arquivo style.css a este HTML — todos os estilos vêm daqui -->
+ 
+</head>
+ 
+<body>
+    <!-- O <body> contém tudo que aparece visualmente na página -->
+ 
+    <div class="container">
+        <!-- Caixa central que agrupa todo o conteúdo — estilizada no CSS como .container -->
+ 
+        <p class="etiqueta">DEV IA</p>
+        <!-- Parágrafo com a classe "etiqueta" — vira o badge verde no topo -->
+ 
+        <h1>Crie sua Página
+            <br>
+            <!-- <br> força uma quebra de linha aqui -->
+            <span>com um prompt</span>
+            <!-- <span> envolve parte do texto para estilizar só essa palavra no CSS (fica em itálico verde) -->
+        </h1>
+ 
+        <p class="subtitulo">Digite um prompt para criar sua página personalizada:</p>
+        <!-- Texto explicativo abaixo do título, estilizado com a classe "subtitulo" -->
+ 
+        <div class="input-wrapper">
+            <!-- Div que agrupa o campo de texto e o botão lado a lado (flex no CSS) -->
+ 
+            <input type="text" id="promptInput" placeholder="Descreva seu negócio. Ex: 'Restaurante, Loja de Roupas, PetShop, etc...'">
+            <!-- Campo de texto onde o usuário digita o prompt -->
+            <!-- type="text" → campo de texto comum -->
+            <!-- id="promptInput" → identificador único usado pelo JavaScript para pegar o valor -->
+            <!-- placeholder → texto de exemplo que some quando o usuário começa a digitar -->
+ 
+            <button onclick="generatePage()">Gerar</button>
+            <!-- Botão que ao ser clicado chama a função generatePage() do JavaScript -->
+ 
+        </div>
+ 
+        <div id="generatedContent"></div>
+        <!-- Caixa vazia que o JavaScript vai preencher com o conteúdo gerado -->
+        <!-- Começa invisível (display: none no CSS) e aparece quando o JS adiciona a classe "visible" -->
+ 
+        <button id="copyBtn" onclick="copyToClipboard()">Copiar conteúdo</button>
+        <!-- Botão de copiar — também começa invisível e aparece junto com o conteúdo gerado -->
+        <!-- onclick chama a função copyToClipboard() do JavaScript -->
+        <p class="bloco-codigo">Conteúdo gerado:</p>
+        <iframe class="bloco-site"></iframe>
+        <!--site que fica dentro-->
+    </div>
+    <!-- Fim do .container -->
+ 
+    <script>
+        // Tudo dentro de <script> é JavaScript — a lógica e comportamento da página
+ 
+        function generatePage() {
+            // Função chamada quando o usuário clica em "Gerar"
+ 
+            const prompt = document.getElementById('promptInput').value.trim();
+            // Pega o texto digitado no input e remove espaços nas bordas
+ 
+            if (!prompt) return;
+            // Se o campo estiver vazio, não faz nada e para aqui
+ 
+            const generatedContent = document.getElementById('generatedContent');
+            // Pega a referência da caixa de conteúdo gerado
+ 
+            const copyBtn = document.getElementById('copyBtn');
+            // Pega a referência do botão copiar
+ 
+            generatedContent.innerHTML = `
+                <h2>Conteúdo gerado para: ${prompt}</h2>
+                <p>Este é um exemplo de conteúdo gerado com base no prompt fornecido.</p>
+            `;
+            // Insere HTML dentro da caixa com o prompt digitado pelo usuário
+ 
+            generatedContent.classList.add('visible');
+            // Adiciona a classe "visible" na caixa — o CSS faz ela aparecer
+ 
+            copyBtn.classList.add('visible');
+            // Adiciona a classe "visible" no botão copiar — ele também aparece
+        }
+ 
+        function copyToClipboard() {
+            // Função chamada quando o usuário clica em "Copiar conteúdo"
+ 
+            const generatedContent = document.getElementById('generatedContent');
+            // Pega o elemento com o conteúdo gerado
+ 
+            navigator.clipboard.writeText(generatedContent.innerText)
+            // Copia o texto da caixa para a área de transferência do sistema
+ 
+                .then(() => alert('Conteúdo copiado!'))
+                // Se deu certo, mostra um alerta de sucesso
+ 
+                .catch(err => alert('Erro ao copiar: ' + err));
+                // Se deu erro, mostra uma mensagem com o erro
+        }
+ 
+        document.getElementById('promptInput').addEventListener('keydown', function(e) {
+            // Fica "escutando" teclas pressionadas dentro do input
+ 
+            if (e.key === 'Enter') generatePage();
+            // Se a tecla for Enter, chama generatePage() — igual a clicar no botão
+        });
+    </script>
+ 
+</body>
+</html>
+ 
